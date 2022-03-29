@@ -21,6 +21,14 @@ class DiskHandler: DiskHandling {
     
     var localCacheFileExtension: String = ".cache"
     
+    var size: String? {
+        guard let localCacheURL = localCacheURL else {
+            return nil
+        }
+
+        return fileManager.getDirectorySize(url: localCacheURL)
+    }
+    
     func fileURL<K, V>(for key: String, using cache: Cache<K, V>) -> URL? where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {
         if !cache.useLocalDisk { return nil }
         guard let cacheURL = localCacheURL else { return nil }
@@ -45,11 +53,10 @@ class DiskHandler: DiskHandling {
     
     func readEntryFromDisk<K, V>(using key: K, with cache: Cache<K, V>) -> Cache<K, V>.Entry? where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {
         if !cache.useLocalDisk { return nil }
-        guard let urlString = fileURL(for: "\(key)", using: cache)?.absoluteString else { return nil }
-        let filePath = Path(urlString)
+        guard let url = fileURL(for: "\(key)", using: cache) else { return nil }
         
         do {
-            let data = try Data(contentsOf: filePath.url)
+            let data = try Data(contentsOf: url)
             let cache = try JSONDecoder().decode(Cache<K, V>.self, from: data)
             return cache.entry(forKey: key)
         } catch {
@@ -59,13 +66,11 @@ class DiskHandler: DiskHandling {
     
     func deleteFromDisk<K, V>(with key: K, using cache: Cache<K, V>) -> Bool where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {
         if !cache.useLocalDisk { return false }
-        guard let urlString = fileURL(for: "\(key)", using: cache)?.absoluteString else { return false }
-        let filePath = Path(urlString)
+        guard let url = fileURL(for: "\(key)", using: cache) else { return false }
         
         do {
-            try filePath.deleteFile()
-            // Sucess if the file no longer exists
-            return !filePath.exists
+            try fileManager.removeItem(at: url)
+            return true
         } catch {
             return false
         }

@@ -20,6 +20,68 @@ class CacheOnDiskTests: XCTestCase {
         cache.diskHandler?.deleteAllOnDisk(using: cache)
     }
     
+    func testReadFile() {
+        let cache = Cache<String, [String]>(useLocalDisk: true)
+        cache.insert(["1", "2", "3"], forKey: "Numbers")
+        guard let fileURL = cache.diskHandler?.fileURL(for: "Numbers", using: cache) else { return XCTFail("Could not get URL") }
+        XCTAssertTrue(Path(url: fileURL)?.exists ?? false)
+        
+        let entry = cache.diskHandler?.readEntryFromDisk(using: "Numbers", with: cache)
+        XCTAssertEqual(entry?.value, ["1", "2", "3"])
+        
+        // Clean up
+        cache.diskHandler?.deleteAllOnDisk(using: cache)
+    }
+    
+    func testDeleteFile() {
+        let cache = Cache<String, [String]>(useLocalDisk: true)
+        cache.insert(["1", "2", "3"], forKey: "Numbers")
+        guard let fileURL = cache.diskHandler?.fileURL(for: "Numbers", using: cache) else { return XCTFail("Could not get URL") }
+        XCTAssertTrue(Path(url: fileURL)?.exists ?? false)
+        
+        // Delete
+        let didDelete = cache.diskHandler?.deleteFromDisk(with: "Numbers", using: cache) ?? false
+        XCTAssertTrue(didDelete)
+        XCTAssertFalse(Path(url: fileURL)?.exists ?? true)
+        
+        // Clean up
+        cache.diskHandler?.deleteAllOnDisk(using: cache)
+    }
+    
+    func testDeleteAll() {
+        let cache = Cache<String, [String]>(useLocalDisk: true)
+        cache.insert(["1", "2", "3"], forKey: "Numbers")
+        cache.insert(["Hello", "World"], forKey: "Greeting")
+        cache.diskHandler?.deleteAllOnDisk(using: cache)
+        
+        guard let cacheURL = cache.diskHandler?.localCacheURL else { return XCTFail("Could not get cache URL") }
+        let path = Path(url: cacheURL)
+        XCTAssertFalse(path?.exists ?? true)
+    }
+    
+    func testSizeString() {
+        let cache = Cache<String, [String]>(useLocalDisk: true)
+        cache.insert(["1", "2", "3"], forKey: "Numbers")
+        cache.insert(["Hello", "World"], forKey: "Greeting")
+        let size = cache.diskHandler?.size
+        XCTAssertEqual(size, "8 KB")
+        
+        // Clean up
+        cache.diskHandler?.deleteAllOnDisk(using: cache)
+    }
+    
+    func testLargerSizeString() {
+        let cache = Cache<String, [String]>(useLocalDisk: true)
+        for _ in 1...500 {
+            cache.insert([""], forKey: UUID().uuidString)
+        }
+        let size = cache.diskHandler?.size
+        XCTAssertEqual(size, "13 MB")
+        
+        // Clean up
+        cache.diskHandler?.deleteAllOnDisk(using: cache)
+    }
+    
     // MARK: - Mock
     func testInit() {
         let cache = Cache<String, [String]>(useLocalDisk: true)

@@ -12,6 +12,7 @@ class MockDiskHandler: DiskHandling {
     var fileManager: FileManager = .default
     var localCacheURL: URL?
     var localCacheFileExtension: String = ".cacheMock"
+    var size: String? = ""
     
     var mockFiles: [String: String] = [:]
     
