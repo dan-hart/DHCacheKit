@@ -8,12 +8,12 @@
 import Foundation
 
 public enum CacheHelper {
-    static let containingFolder = "DHCache"
-    static var fileManager: FileManager = .default
-    static var localCacheFileExtension: String = ".cache"
-    static var localCacheURL: URL? = try? CacheHelper.fileManager.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent(CacheHelper.containingFolder)
+    public static let containingFolder = "DHCache"
+    public static var fileManager: FileManager = .default
+    public static var localCacheFileExtension: String = ".cache"
+    public static var localCacheURL: URL? = try? CacheHelper.fileManager.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent(CacheHelper.containingFolder)
     
-    @discardableResult static func deleteAllOnDisk() -> Bool {
+    @discardableResult public static func deleteAllOnDisk() -> Bool {
         guard let localCacheURL = localCacheURL else { return false }
         
         do {
