@@ -33,9 +33,4 @@ class MockDiskHandler: DiskHandling {
         mockFiles.removeValue(forKey: "\(key)")
         return true
     }
-    
-    func deleteAllOnDisk<K, V>(using cache: Cache<K, V>) -> Bool where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {
-        mockFiles.removeAll()
-        return true
-    }
 }

@@ -17,7 +17,7 @@ class CacheOnDiskTests: XCTestCase {
         XCTAssertTrue(Path(url: fileURL)?.exists ?? false)
         
         // Clean up
-        cache.diskHandler?.deleteAllOnDisk(using: cache)
+        CacheHelper.deleteAllOnDisk()
     }
     
     func testReadFile() {
@@ -30,7 +30,7 @@ class CacheOnDiskTests: XCTestCase {
         XCTAssertEqual(entry?.value, ["1", "2", "3"])
         
         // Clean up
-        cache.diskHandler?.deleteAllOnDisk(using: cache)
+        CacheHelper.deleteAllOnDisk()
     }
     
     func testDeleteFile() {
@@ -45,16 +45,16 @@ class CacheOnDiskTests: XCTestCase {
         XCTAssertFalse(Path(url: fileURL)?.exists ?? true)
         
         // Clean up
-        cache.diskHandler?.deleteAllOnDisk(using: cache)
+        CacheHelper.deleteAllOnDisk()
     }
     
     func testDeleteAll() {
         let cache = Cache<String, [String]>(useLocalDisk: true)
         cache.insert(["1", "2", "3"], forKey: "Numbers")
         cache.insert(["Hello", "World"], forKey: "Greeting")
-        cache.diskHandler?.deleteAllOnDisk(using: cache)
+        CacheHelper.deleteAllOnDisk()
         
-        guard let cacheURL = cache.diskHandler?.localCacheURL else { return XCTFail("Could not get cache URL") }
+        guard let cacheURL = CacheHelper.localCacheURL else { return XCTFail("Could not get cache URL") }
         let path = Path(url: cacheURL)
         XCTAssertFalse(path?.exists ?? true)
     }
@@ -67,7 +67,7 @@ class CacheOnDiskTests: XCTestCase {
         XCTAssertEqual(size, "8 KB")
         
         // Clean up
-        cache.diskHandler?.deleteAllOnDisk(using: cache)
+        CacheHelper.deleteAllOnDisk()
     }
     
     func testLargerSizeString() {
@@ -79,7 +79,7 @@ class CacheOnDiskTests: XCTestCase {
         XCTAssertEqual(size, "13 MB")
         
         // Clean up
-        cache.diskHandler?.deleteAllOnDisk(using: cache)
+        CacheHelper.deleteAllOnDisk()
     }
     
     // MARK: - Mock
@@ -106,17 +106,6 @@ class CacheOnDiskTests: XCTestCase {
         XCTAssertEqual(entry?.value, ["Hello", "World"])
         
         cache.removeValue(forKey: "Greeting")
-        XCTAssertEqual((cache.diskHandler as? MockDiskHandler)?.mockFiles.count, 0)
-    }
-    
-    func testDeleteAllFromDisk() {
-        let cache = Cache<String, [String]>(useLocalDisk: true)
-        cache.diskHandler = MockDiskHandler()
-        cache.insert(["Hello", "World"], forKey: "Greeting")
-        cache.insert(["1", "2", "3"], forKey: "Count")
-        XCTAssertEqual((cache.diskHandler as? MockDiskHandler)?.mockFiles.count, 2)
-        
-        cache.diskHandler?.deleteAllOnDisk(using: cache)
         XCTAssertEqual((cache.diskHandler as? MockDiskHandler)?.mockFiles.count, 0)
     }
 }
