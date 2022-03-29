@@ -31,9 +31,9 @@ public final class Cache<K: Codable & Hashable, V: Codable> {
             wrapped.countLimit = maximumEntryCount
             wrapped.delegate = keyTracker
             if useLocalDisk {
-                diskHandler = nil
-            } else {
                 diskHandler = DiskHandler()
+            } else {
+                diskHandler = nil
             }
         }
     
