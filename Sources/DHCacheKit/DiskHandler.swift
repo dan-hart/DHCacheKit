@@ -38,9 +38,8 @@ class DiskHandler: DiskHandling {
         
         do {
             let data = try JSONEncoder().encode(cache)
-            let file = File<Data>(path: filePath)
-            try file.write(data)
-            return file.exists
+            try data.write(to: filePath)
+            return filePath.exists
         } catch(let error) {
             print(error)
             return false
@@ -53,8 +52,7 @@ class DiskHandler: DiskHandling {
         let filePath = Path(urlString)
         
         do {
-            let file = File<Data>(path: filePath)
-            let data = try file.read()
+            let data = try Data(contentsOf: filePath.url)
             let cache = try JSONDecoder().decode(Cache<K, V>.self, from: data)
             return cache.entry(forKey: key)
         } catch {
