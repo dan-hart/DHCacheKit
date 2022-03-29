@@ -5,6 +5,12 @@ import PackageDescription
 
 let package = Package(
     name: "DHCacheKit",
+    platforms: [
+        .iOS(.v10),
+        .tvOS(.v9),
+        .watchOS(.v2),
+        .macOS(.v10_10)
+    ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
@@ -14,7 +20,7 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(url: "https://github.com/kylef/PathKit", .upToNextMajor(from: "1.0.0")),
+        .package(url: "https://github.com/nvzqz/FileKit", .upToNextMajor(from: "6.0.0")),
         .package(url: "https://github.com/SwifterSwift/SwifterSwift", .upToNextMajor(from: "5.0.0")),
     ],
     targets: [
@@ -22,9 +28,9 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "DHCacheKit",
-            dependencies: []),
+            dependencies: ["FileKit", "SwifterSwift"]),
         .testTarget(
             name: "DHCacheKitTests",
-            dependencies: ["DHCacheKit"]),
+            dependencies: ["DHCacheKit", "FileKit", "SwifterSwift"]),
     ]
 )
