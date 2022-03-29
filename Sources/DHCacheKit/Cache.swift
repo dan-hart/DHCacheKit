@@ -42,7 +42,7 @@ public final class Cache<K: Codable & Hashable, V: Codable> {
         let entry = Entry(key: key, value: value, expirationDate: date)
         wrapped.setObject(entry, forKey: WrappedKey(key))
         keyTracker.keys.insert(key)
-        diskHandler?.saveToDisk(V.self, with: key, using: self)
+        diskHandler?.saveToDisk(V.self, with: "\(key)", using: self)
     }
     
     public func value<V: Codable>(forKey key: K) -> V? {

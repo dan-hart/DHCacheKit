@@ -16,30 +16,27 @@ class DiskHandler: DiskHandling {
     }
     
     var localCacheURL: URL? {
-        return try? fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent(DiskHandler.containingFolder)
+        return try? fileManager.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent(DiskHandler.containingFolder)
     }
     
     var localCacheFileExtension: String = ".cache"
     
-    func fileURL<K, V>(for key: K, using cache: Cache<K, V>) -> URL? where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {
+    func fileURL<K, V>(for key: String, using cache: Cache<K, V>) -> URL? where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {
         if !cache.useLocalDisk { return nil }
         guard let cacheURL = localCacheURL else { return nil }
-        let localCachePath = Path(cacheURL.absoluteString)
-        if !localCachePath.exists {
-            try? localCachePath.createDirectory()
-        }
-        return cacheURL.appendingPathComponent("\(key)" + localCacheFileExtension)
+        return cacheURL.appendingPathComponent(key + localCacheFileExtension)
     }
     
-    func saveToDisk<K, V>(_: V.Type, with key: K, using cache: Cache<K, V>) -> Bool where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {
+    func saveToDisk<K, V>(_: V.Type, with key: String, using cache: Cache<K, V>) -> Bool where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {
         if !cache.useLocalDisk { return false }
-        guard let urlString = fileURL(for: key, using: cache)?.absoluteString else { return false }
-        let filePath = Path(urlString)
+        guard let directoryURL = localCacheURL else { return false }
+        guard let url = fileURL(for: key, using: cache) else { return false }
         
         do {
             let data = try JSONEncoder().encode(cache)
-            try data.write(to: filePath)
-            return filePath.exists
+            try fileManager.createDirectory(atPath: directoryURL.path, withIntermediateDirectories: true, attributes: nil)
+            try data.write(to: url)
+            return true
         } catch(let error) {
             print(error)
             return false
@@ -48,7 +45,7 @@ class DiskHandler: DiskHandling {
     
     func readEntryFromDisk<K, V>(using key: K, with cache: Cache<K, V>) -> Cache<K, V>.Entry? where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {
         if !cache.useLocalDisk { return nil }
-        guard let urlString = fileURL(for: key, using: cache)?.absoluteString else { return nil }
+        guard let urlString = fileURL(for: "\(key)", using: cache)?.absoluteString else { return nil }
         let filePath = Path(urlString)
         
         do {
@@ -62,7 +59,7 @@ class DiskHandler: DiskHandling {
     
     func deleteFromDisk<K, V>(with key: K, using cache: Cache<K, V>) -> Bool where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {
         if !cache.useLocalDisk { return false }
-        guard let urlString = fileURL(for: key, using: cache)?.absoluteString else { return false }
+        guard let urlString = fileURL(for: "\(key)", using: cache)?.absoluteString else { return false }
         let filePath = Path(urlString)
         
         do {
@@ -79,13 +76,14 @@ class DiskHandler: DiskHandling {
         guard let localCacheURL = localCacheURL else { return false }
         
         do {
-            let localCachePath = Path(localCacheURL.absoluteString)
-            let cacheFiles = localCachePath.find(searchDepth: 1) { path in
-                path.pathExtension == localCacheFileExtension
+            let filePaths = try fileManager.contentsOfDirectory(at: localCacheURL, includingPropertiesForKeys: nil)
+            for filePath in filePaths {
+                try fileManager.removeItem(at: filePath)
             }
-            for file in cacheFiles {
-                try file.deleteFile()
-            }
+            
+            // Remove folder
+            try fileManager.removeItem(at: localCacheURL)
+            
             return true
         } catch {
             return false

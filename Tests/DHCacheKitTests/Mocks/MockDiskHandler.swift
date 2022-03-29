@@ -15,11 +15,11 @@ class MockDiskHandler: DiskHandling {
     
     var mockFiles: [String: String] = [:]
     
-    func fileURL<K, V>(for key: K, using cache: Cache<K, V>) -> URL? where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {
+    func fileURL<K, V>(for key: String, using cache: Cache<K, V>) -> URL? where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {
         return URL(string: mockFiles["\(key)"])
     }
     
-    func saveToDisk<K, V>(_: V.Type, with key: K, using cache: Cache<K, V>) -> Bool where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {
+    func saveToDisk<K, V>(_: V.Type, with key: String, using cache: Cache<K, V>) -> Bool where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {
         mockFiles["\(key)"] = UUID().uuidString
         return true
     }

@@ -10,6 +10,17 @@ import XCTest
 import FileKit
 
 class CacheOnDiskTests: XCTestCase {
+    func testWriteFile() {
+        let cache = Cache<String, [String]>(useLocalDisk: true)
+        cache.insert(["1", "2", "3"], forKey: "Numbers")
+        guard let fileURL = cache.diskHandler?.fileURL(for: "Numbers", using: cache) else { return XCTFail("Could not get URL") }
+        XCTAssertTrue(Path(url: fileURL)?.exists ?? false)
+        
+        // Clean up
+        cache.diskHandler?.deleteAllOnDisk(using: cache)
+    }
+    
+    // MARK: - Mock
     func testInit() {
         let cache = Cache<String, [String]>(useLocalDisk: true)
         XCTAssertNotNil(cache)
