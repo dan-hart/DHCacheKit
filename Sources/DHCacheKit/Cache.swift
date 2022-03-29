@@ -52,6 +52,8 @@ public final class Cache<K: Codable & Hashable, V: Codable> {
             entry = memoryEntry
         } else {
             if useLocalDisk, let diskEntry = diskHandler?.readEntryFromDisk(using: key, with: self) {
+                wrapped.setObject(diskEntry, forKey: WrappedKey(key))
+                keyTracker.keys.insert(key)
                 entry = diskEntry
             }
         }
