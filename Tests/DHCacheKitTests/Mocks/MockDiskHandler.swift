@@ -17,7 +17,8 @@ class MockDiskHandler: DiskHandling {
     var mockFiles: [String: String] = [:]
     
     func fileURL<K, V>(for key: String, using cache: Cache<K, V>) -> URL? where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {
-        return URL(string: mockFiles["\(key)"])
+        guard let stringURL = mockFiles["\(key)"] else { return nil }
+        return URL(string: stringURL)
     }
     
     func saveToDisk<K, V>(_: V.Type, with key: String, using cache: Cache<K, V>) -> Bool where K : Decodable, K : Encodable, K : Hashable, V : Decodable, V : Encodable {

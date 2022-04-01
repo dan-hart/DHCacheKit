@@ -7,7 +7,6 @@
 
 import Foundation
 import FileKit
-import SwifterSwift
 
 public final class Cache<K: Codable & Hashable, V: Codable> {
     // MARK: - Private
