@@ -45,7 +45,7 @@ public final class Cache<K: Codable & Hashable, V: Codable> {
         diskHandler?.saveToDisk(V.self, with: "\(key)", using: self)
     }
     
-    public func value<V: Codable>(forKey key: K) -> V? {
+    public func value<V: Codable>(_: V.Type, forKey key: K) -> V? {
         var entry: Entry?
         
         if let memoryEntry = wrapped.object(forKey: WrappedKey(key)) {
@@ -76,7 +76,7 @@ public final class Cache<K: Codable & Hashable, V: Codable> {
 // MARK: - Cache Subscript
 extension Cache {
     public subscript(key: K) -> V? {
-        get { return value(forKey: key) }
+        get { return value(V.self, forKey: key) }
         set {
             guard let value = newValue else {
                 // If nil was assigned using our subscript,
@@ -112,9 +112,9 @@ extension Cache {
 // MARK: - Cache.Entry
 extension Cache {
     public final class Entry {
-        let key: K
-        let value: V
-        let expirationDate: Date
+        public let key: K
+        public let value: V
+        public let expirationDate: Date
         
         init(key: K, value: V, expirationDate: Date) {
             self.key = key
